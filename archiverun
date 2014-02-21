@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Just a shortcut to tar.gz the relevant files for a run, cf DATAFLOW
+#  usage: ./archiverun ARCH N1e3T2.0_ [N1e3T2.0_2 .. ]
+#
+ARCH=$1.tgz
+shift;
+
+while [ $# -gt 0 ]; do
+  PREFIX=$1
+  PARS=$PARS" "$PREFIX
+  FNAMES=$FNAMES" "$PREFIX*xml" "$PREFIX*run1
+  shift
+done
+
+tar -czf $ARCH $PARs $FNAMES
+rm $FNAMES
+

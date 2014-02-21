@@ -1,0 +1,39 @@
+#!/bin/bash
+
+################ Make job array: seed task files, prepare a batch script, the bsub it
+#  hat tip: M.S.
+#  usage:    ./mkr $PREFIX $NSEEDS [$STARTSEED]
+
+
+PREFIX=$1
+test $# -lt 2 && NSEEDS=20      || NSEEDS=$2
+test $# -lt 3 && STARTSEED=8000 || STARTSEED=$3
+FNAME=$PREFIX"_"   # that's what ../../seed does
+
+###################### prepare a batch script
+echo "#BSUB -L /bin/bash
+
+#BSUB -J "$FNAME"[1-"$NSEEDS"]
+#BSUB -oo "$FNAME"%I.stdout
+#BSUB -eo "$FNAME"%I.stderr
+############# BSUB -R 'rusage[mem=1000]'  # watch out for 0% CPU!!!!
+
+. /etc/profile
+module load alps/test
+
+../ising "$FNAME'$LSB_JOBINDEX'".in.xml" >$FNAME.bsub
+
+
+######### seed the task files: 1 task (=1 seed) per job file
+
+for j in `seq 1 $NSEEDS`; do
+  ../seed $PREFIX 1 $(( $STARTSEED+$j-1))
+  FN=$PREFIX"_"$j
+  mv $PREFIX"_" $FN
+  parameter2xml $FN
+done
+
+################### ready to submit
+bsub <$FNAME.bsub
+
+

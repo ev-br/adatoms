@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# add random SEEDs to parameter file 
+# format: seed filename N STARTSEED
+# outputs _FILE, ready for parameter2xml
+#
+
+FILE=$1
+N=$2
+test $# -lt 3 && STARTSEED=8000 || STARTSEED=$3
+OUT="$FILE"_
+
+cat $FILE > $OUT
+for I in `seq 1 1 $N`; do
+  echo { SEED=$(expr $STARTSEED + $I) } >>$OUT
+done
